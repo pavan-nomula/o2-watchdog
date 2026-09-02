@@ -11,9 +11,10 @@ import { Button } from "@/components/ui/button";
 import { SparkleGrid } from "@/components/dashboard/SparkleGrid";
 import { levelOf, thresholdGrams } from "@/lib/oxygen-system";
 
-const TITLE = "O2 Changeover Console — Dual Cylinder Monitoring";
+const TITLE = "Nirvana Technologies — O2 Dual Cylinder Watchdog";
 const DESC =
   "Real-time ESP32 + HX711 dashboard for dual oxygen cylinder weight monitoring, valve status and automatic changeover control.";
+const OG_IMAGE = "https://nirvana-innovations-technologies.onrender.com/og-image.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,6 +23,16 @@ export const Route = createFileRoute("/")({
       { name: "description", content: DESC },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESC },
+      { property: "og:image", content: OG_IMAGE },
+      { property: "og:image:secure_url", content: OG_IMAGE },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:width", content: "1024" },
+      { property: "og:image:height", content: "388" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESC },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
   }),
   component: Dashboard,

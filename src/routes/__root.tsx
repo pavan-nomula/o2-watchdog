@@ -77,20 +77,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "O2 Changeover Console" },
+      { title: "Nirvana Technologies — O2 Dual Cylinder Watchdog" },
       {
         name: "description",
         content:
-          "Monitoring and automatic changeover console for a dual oxygen cylinder ESP32 system.",
+          "Real-time ESP32 + HX711 dashboard for dual oxygen cylinder weight monitoring, valve status and automatic changeover control.",
       },
-      { property: "og:title", content: "O2 Changeover Console" },
+      { property: "og:title", content: "Nirvana Technologies — O2 Dual Cylinder Watchdog" },
       {
         property: "og:description",
         content:
-          "Monitoring and automatic changeover console for a dual oxygen cylinder ESP32 system.",
+          "Real-time ESP32 + HX711 dashboard for dual oxygen cylinder weight monitoring, valve status and automatic changeover control.",
       },
+      { property: "og:image", content: "https://nirvana-innovations-technologies.onrender.com/og-image.png" },
+      { property: "og:image:secure_url", content: "https://nirvana-innovations-technologies.onrender.com/og-image.png" },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:width", content: "1024" },
+      { property: "og:image:height", content: "388" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://nirvana-innovations-technologies.onrender.com/og-image.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
