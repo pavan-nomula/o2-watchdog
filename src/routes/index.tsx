@@ -8,6 +8,7 @@ import { EventLog } from "@/components/dashboard/EventLog";
 import { StatusPill } from "@/components/dashboard/StatusBits";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SparkleGrid } from "@/components/dashboard/SparkleGrid";
 import { levelOf, thresholdGrams } from "@/lib/oxygen-system";
 
 const TITLE = "O2 Changeover Console — Dual Cylinder Monitoring";
@@ -40,17 +41,22 @@ function Dashboard() {
   ].filter(Boolean) as string[];
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-10">
-      <header className="panel flex flex-wrap items-center justify-between gap-4 p-5">
-        <div className="flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-md bg-primary/15 text-primary">
-            <Activity className="size-6" aria-hidden="true" />
-          </span>
+    <>
+      <SparkleGrid />
+      <main className="relative z-10 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-10">
+      <header className="panel card-hover-glow flex flex-wrap items-center justify-between gap-4 p-5">
+        <div className="flex items-center gap-4">
+          <img
+            src="/nirvana-logo.png"
+            alt="Nirvana Innovations & Technologies"
+            className="h-12 max-w-[200px] sm:h-14 sm:max-w-[240px] object-contain mix-blend-screen"
+          />
+          <div className="h-10 w-[1px] bg-border hidden sm:block" />
           <div>
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
               Dual Oxygen Cylinder Console
             </h1>
-            <p className="label-caps">ESP32 · HX711 load cells · servo changeover</p>
+            <p className="label-caps">Nirvana Innovations & Technologies · ESP32 · HX711</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -91,7 +97,7 @@ function Dashboard() {
         <CylinderCard id="C1" state={state} weight={state.c1Weight} valve={state.c1Valve} />
         <CylinderCard id="C2" state={state} weight={state.c2Weight} valve={state.c2Valve} />
 
-        <Card className="panel gap-0 p-5">
+        <Card className="panel card-hover-glow gap-0 p-5">
           <h2 className="text-base font-semibold tracking-tight">Supply status</h2>
           <p className="label-caps">Line pressure source</p>
 
@@ -143,10 +149,20 @@ function Dashboard() {
         />
       </section>
 
-      <footer className="mt-6 pb-4 text-center font-mono text-[0.7rem] tracking-widest text-muted-foreground uppercase">
-        Telemetry simulated locally · ready for ESP32 websocket integration
+      <footer className="mt-8 border-t border-border/40 pt-6 pb-6 text-center">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <img
+            src="/nirvana-logo.png"
+            alt="Nirvana Innovations & Technologies"
+            className="h-10 opacity-90 object-contain mix-blend-screen"
+          />
+          <p className="font-mono text-[0.7rem] tracking-widest text-muted-foreground uppercase">
+            Nirvana Innovations and Technologies · Telemetry simulated locally · Ready for ESP32 integration
+          </p>
+        </div>
       </footer>
     </main>
+    </>
   );
 }
 

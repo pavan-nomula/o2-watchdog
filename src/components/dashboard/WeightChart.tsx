@@ -17,7 +17,7 @@ const fmt = (t: number) =>
 
 export function WeightChart({ history, state }: { history: SamplePoint[]; state: SystemState }) {
   return (
-    <Card className="panel gap-0 p-5">
+    <Card className="panel card-hover-glow gap-0 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-semibold tracking-tight">Real-time weight trend</h2>

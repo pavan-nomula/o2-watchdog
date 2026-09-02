@@ -36,11 +36,16 @@ export function StatusPill({
 }
 
 export function LevelBar({ pct, level }: { pct: number; level: Level }) {
-  const tone = level === "ok" ? "bg-ok" : level === "warn" ? "bg-warn" : "bg-danger";
+  const tone =
+    level === "ok"
+      ? "bg-gradient-to-r from-teal-500 to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+      : level === "warn"
+      ? "bg-gradient-to-r from-amber-500 to-yellow-400 shadow-[0_0_12px_rgba(245,158,11,0.5)]"
+      : "bg-gradient-to-r from-red-600 to-rose-400 shadow-[0_0_12px_rgba(239,68,68,0.6)]";
   return (
-    <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+    <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted/80 p-0.5 border border-border/40">
       <div
-        className={cn("h-full rounded-full transition-[width] duration-700 ease-out", tone)}
+        className={cn("h-full rounded-full transition-all duration-700 ease-out", tone)}
         style={{ width: `${Math.max(2, pct)}%` }}
       />
     </div>

@@ -50,9 +50,58 @@ export function useOxygenSystem() {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    log("SYSTEM", "ESP32 link established — HX711 A/B streaming at 1 Hz");
+    log("SYSTEM", "ESP32 telemetry link initialized — listening on /api/telemetry");
 
-    const id = setInterval(() => {
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch("/api/telemetry");
+        if (res.ok) {
+          const data = (await res.json()) as {
+            isRealHardware?: boolean;
+            c1Weight?: number;
+            c2Weight?: number;
+            c1Valve?: "OPEN" | "CLOSED";
+            c2Valve?: "OPEN" | "CLOSED";
+            active?: "C1" | "C2" | "NONE";
+          };
+          if (data && data.isRealHardware) {
+            setState((prev) => {
+              const c1 = Number(data.c1Weight ?? prev.c1Weight);
+              const c2 = Number(data.c2Weight ?? prev.c2Weight);
+              const c1Valve = data.c1Valve === "OPEN" ? "OPEN" : "CLOSED";
+              const c2Valve = data.c2Valve === "OPEN" ? "OPEN" : "CLOSED";
+              const active = data.active === "C1" ? "C1" : data.active === "C2" ? "C2" : "NONE";
+              const t = thresholdGrams(prev.config);
+              const bothLow = c1 <= t && c2 <= t;
+
+              if (active !== prev.active) {
+                log("CHANGEOVER", `ESP32 Hardware Changeover: active cylinder is now ${active}`);
+              }
+
+              setHistory((h) =>
+                [...h, { t: Date.now(), c1: +c1.toFixed(1), c2: +c2.toFixed(1) }].slice(-MAX_POINTS),
+              );
+
+              return {
+                ...prev,
+                connected: true,
+                c1Weight: c1,
+                c2Weight: c2,
+                c1Valve,
+                c2Valve,
+                active,
+                bothLow,
+                lastUpdate: Date.now(),
+              };
+            });
+            return;
+          }
+        }
+      } catch {
+        // Fallback to simulation if server API is unreachable
+      }
+
+      // Default simulation loop if no real hardware is connected
       setState((prev) => {
         if (!prev.connected) return prev;
         const t = thresholdGrams(prev.config);

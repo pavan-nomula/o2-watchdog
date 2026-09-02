@@ -56,7 +56,7 @@ export function ControlPanel({ state, onValve, onMode, onConfig, onRefill }: Pro
   };
 
   return (
-    <Card className="panel gap-0 p-5">
+    <Card className="panel card-hover-glow gap-0 p-5">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-base font-semibold tracking-tight">Control &amp; configuration</h2>

@@ -68,15 +68,6 @@ Calibration parameters
 
 Create a clean industrial + medical-tech style dashboard, responsive on desktop and mobile, with clear green/amber/red status indicators. Keep the architecture ready for future ESP32 real-time integration.
 
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/4b5f7837-a02b-4b87-9156-7b46dbf20b2c).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 

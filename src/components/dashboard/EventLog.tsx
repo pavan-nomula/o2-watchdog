@@ -11,7 +11,7 @@ const tone: Record<EventEntry["kind"], string> = {
 
 export function EventLog({ events }: { events: EventEntry[] }) {
   return (
-    <Card className="panel gap-0 p-5">
+    <Card className="panel card-hover-glow gap-0 p-5">
       <h2 className="text-base font-semibold tracking-tight">Changeover &amp; event history</h2>
       <p className="label-caps">Most recent first</p>
       <ul className="mt-4 max-h-80 space-y-2 overflow-y-auto pr-1">

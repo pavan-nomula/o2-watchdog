@@ -22,11 +22,11 @@ export function CylinderCard({
   return (
     <Card
       className={cn(
-        "panel relative gap-0 overflow-hidden p-5",
-        isActive && "ring-1 ring-primary/60",
+        "panel card-hover-glow relative gap-0 overflow-hidden p-5 transition-all duration-300",
+        isActive && "active-cylinder-glow ring-1 ring-primary/80",
       )}
     >
-      {isActive && <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />}
+      {isActive && <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-cyan-400 to-primary animate-pulse" />}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="grid size-10 place-items-center rounded-md border border-border bg-secondary text-primary">

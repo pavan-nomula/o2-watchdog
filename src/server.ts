@@ -44,8 +44,70 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+let latestTelemetry: {
+  c1Weight: number;
+  c2Weight: number;
+  c1Valve: "OPEN" | "CLOSED";
+  c2Valve: "OPEN" | "CLOSED";
+  active: "C1" | "C2" | "NONE";
+  lastUpdate: number;
+  isRealHardware?: boolean;
+} | null = null;
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/api/telemetry") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        });
+      }
+
+      if (request.method === "POST") {
+        try {
+          const body = (await request.json()) as Record<string, unknown>;
+          latestTelemetry = {
+            c1Weight: Number(body.c1Weight ?? body.c1) || 0,
+            c2Weight: Number(body.c2Weight ?? body.c2) || 0,
+            c1Valve: body.c1Valve === "OPEN" || body.c1Valve === "ON" ? "OPEN" : "CLOSED",
+            c2Valve: body.c2Valve === "OPEN" || body.c2Valve === "ON" ? "OPEN" : "CLOSED",
+            active:
+              body.active === "C1" || body.active === 1 || body.active === "1"
+                ? "C1"
+                : body.active === "C2" || body.active === 2 || body.active === "2"
+                ? "C2"
+                : "NONE",
+            lastUpdate: Date.now(),
+            isRealHardware: true,
+          };
+          return new Response(JSON.stringify({ success: true, data: latestTelemetry }), {
+            headers: {
+              "content-type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          });
+        } catch {
+          return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+            status: 400,
+            headers: { "content-type": "application/json", "Access-Control-Allow-Origin": "*" },
+          });
+        }
+      }
+
+      return new Response(JSON.stringify(latestTelemetry ?? { isRealHardware: false }), {
+        headers: {
+          "content-type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
