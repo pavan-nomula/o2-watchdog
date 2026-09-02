@@ -89,14 +89,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Real-time ESP32 + HX711 dashboard for dual oxygen cylinder weight monitoring, valve status and automatic changeover control.",
       },
-      { property: "og:image", content: "https://nirvana-innovations-technologies.onrender.com/og-image.png" },
-      { property: "og:image:secure_url", content: "https://nirvana-innovations-technologies.onrender.com/og-image.png" },
+      { property: "og:image", content: "https://nirvana-innovations-technologies.onrender.com/nirvana-logo.png" },
+      { property: "og:image:secure_url", content: "https://nirvana-innovations-technologies.onrender.com/nirvana-logo.png" },
       { property: "og:image:type", content: "image/png" },
       { property: "og:image:width", content: "1024" },
       { property: "og:image:height", content: "388" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://nirvana-innovations-technologies.onrender.com/og-image.png" },
+      { name: "twitter:image", content: "https://nirvana-innovations-technologies.onrender.com/nirvana-logo.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

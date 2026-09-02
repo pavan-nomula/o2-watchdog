@@ -14,7 +14,7 @@ import { levelOf, thresholdGrams } from "@/lib/oxygen-system";
 const TITLE = "Nirvana Technologies — O2 Dual Cylinder Watchdog";
 const DESC =
   "Real-time ESP32 + HX711 dashboard for dual oxygen cylinder weight monitoring, valve status and automatic changeover control.";
-const OG_IMAGE = "https://nirvana-innovations-technologies.onrender.com/og-image.png";
+const OG_IMAGE = "https://nirvana-innovations-technologies.onrender.com/nirvana-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
