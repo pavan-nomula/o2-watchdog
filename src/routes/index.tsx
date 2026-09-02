@@ -1,24 +1,160 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Activity, AlertTriangle, Radio, ShieldCheck, Wifi, WifiOff } from "lucide-react";
+import { useOxygenSystem } from "@/hooks/use-oxygen-system";
+import { CylinderCard } from "@/components/dashboard/CylinderCard";
+import { WeightChart } from "@/components/dashboard/WeightChart";
+import { ControlPanel } from "@/components/dashboard/ControlPanel";
+import { EventLog } from "@/components/dashboard/EventLog";
+import { StatusPill } from "@/components/dashboard/StatusBits";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { levelOf, thresholdGrams } from "@/lib/oxygen-system";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const TITLE = "O2 Changeover Console — Dual Cylinder Monitoring";
+const DESC =
+  "Real-time ESP32 + HX711 dashboard for dual oxygen cylinder weight monitoring, valve status and automatic changeover control.";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESC },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESC },
+    ],
+  }),
+  component: Dashboard,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Dashboard() {
+  const { state, history, events, setValve, setMode, updateConfig, refillCylinder, toggleConnection } =
+    useOxygenSystem();
+
+  const c1Level = levelOf(state.c1Weight, state.config);
+  const c2Level = levelOf(state.c2Weight, state.config);
+  const alerts = [
+    state.bothLow && "BOTH CYLINDERS LOW — oxygen supply interrupted",
+    !state.bothLow && c1Level === "low" && "C1 below low-level threshold",
+    !state.bothLow && c2Level === "low" && "C2 below low-level threshold",
+    !state.connected && "ESP32 telemetry link lost — values are stale",
+  ].filter(Boolean) as string[];
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-10">
+      <header className="panel flex flex-wrap items-center justify-between gap-4 p-5">
+        <div className="flex items-center gap-3">
+          <span className="grid size-11 place-items-center rounded-md bg-primary/15 text-primary">
+            <Activity className="size-6" aria-hidden="true" />
+          </span>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+              Dual Oxygen Cylinder Console
+            </h1>
+            <p className="label-caps">ESP32 · HX711 load cells · servo changeover</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusPill level={state.connected ? "ok" : "low"} live={state.connected}>
+            {state.connected ? (
+              <>
+                <Wifi className="size-3.5" aria-hidden="true" /> Online
+              </>
+            ) : (
+              <>
+                <WifiOff className="size-3.5" aria-hidden="true" /> Offline
+              </>
+            )}
+          </StatusPill>
+          <StatusPill level={state.mode === "AUTO" ? "ok" : "warn"}>{state.mode} mode</StatusPill>
+          <Button variant="outline" size="sm" onClick={toggleConnection}>
+            <Radio className="size-4" aria-hidden="true" />
+            Simulate link
+          </Button>
+        </div>
+      </header>
+
+      {alerts.length > 0 && (
+        <div className="mt-4 space-y-2" role="alert">
+          {alerts.map((a) => (
+            <div
+              key={a}
+              className="flex items-center gap-3 rounded-lg border border-danger/50 bg-danger/10 px-4 py-3 text-sm font-medium text-danger"
+            >
+              <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
+              {a}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <section className="mt-4 grid gap-4 lg:grid-cols-3">
+        <CylinderCard id="C1" state={state} weight={state.c1Weight} valve={state.c1Valve} />
+        <CylinderCard id="C2" state={state} weight={state.c2Weight} valve={state.c2Valve} />
+
+        <Card className="panel gap-0 p-5">
+          <h2 className="text-base font-semibold tracking-tight">Supply status</h2>
+          <p className="label-caps">Line pressure source</p>
+
+          <div className="mt-6 grid place-items-center rounded-lg border border-border bg-card py-7">
+            <span className="label-caps">Active cylinder</span>
+            <span
+              className={`mt-1 font-mono text-5xl font-bold ${
+                state.active === "NONE" ? "text-danger" : "text-primary"
+              }`}
+            >
+              {state.active === "NONE" ? "—" : state.active}
+            </span>
+            <span className="mt-2 text-xs text-muted-foreground">
+              {state.active === "NONE" ? "No supply available" : "Delivering oxygen"}
+            </span>
+          </div>
+
+          <dl className="mt-5 space-y-2.5 font-mono text-xs">
+            <Row label="Low threshold" value={`${state.config.lowThresholdPct}% · ${thresholdGrams(state.config).toFixed(0)} g`} />
+            <Row label="Full reference" value={`${state.config.fullWeight} g`} />
+            <Row label="Changeovers" value={String(events.filter((e) => e.kind === "CHANGEOVER").length)} />
+            <Row
+              label="Last update"
+              value={state.lastUpdate ? new Date(state.lastUpdate).toLocaleTimeString() : "—"}
+            />
+          </dl>
+
+          <p className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="size-4 text-ok" aria-hidden="true" />
+            Failsafe: both valves close when both cylinders are low.
+          </p>
+        </Card>
+      </section>
+
+      <section className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <WeightChart history={history} state={state} />
+        </div>
+        <EventLog events={events} />
+      </section>
+
+      <section className="mt-4">
+        <ControlPanel
+          state={state}
+          onValve={setValve}
+          onMode={setMode}
+          onConfig={updateConfig}
+          onRefill={refillCylinder}
+        />
+      </section>
+
+      <footer className="mt-6 pb-4 text-center font-mono text-[0.7rem] tracking-widest text-muted-foreground uppercase">
+        Telemetry simulated locally · ready for ESP32 websocket integration
+      </footer>
+    </main>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between border-b border-border/60 pb-2">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="tabular-nums">{value}</dd>
     </div>
   );
 }
