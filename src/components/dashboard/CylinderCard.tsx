@@ -44,15 +44,15 @@ export function CylinderCard({
 
       <div className="mt-6 flex items-end justify-between">
         <div>
-          <p className="label-caps">Net weight</p>
+          <p className="label-caps">Current weight</p>
           <p className="font-mono text-4xl font-semibold tabular-nums">
-            {weight.toFixed(1)}
+            {Math.round(weight)}
             <span className="ml-1 text-base text-muted-foreground">g</span>
           </p>
         </div>
         <div className="text-right">
           <p className="label-caps">Remaining</p>
-          <p className="font-mono text-3xl font-semibold tabular-nums">{pct.toFixed(1)}%</p>
+          <p className="font-mono text-3xl font-semibold tabular-nums">{pct.toFixed(0)}%</p>
         </div>
       </div>
 

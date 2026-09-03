@@ -63,14 +63,17 @@ export function useOxygenSystem() {
             c1Valve?: "OPEN" | "CLOSED";
             c2Valve?: "OPEN" | "CLOSED";
             active?: "C1" | "C2" | "NONE";
+            mode?: "AUTO" | "MANUAL";
+            commandMode?: "AUTO" | "MANUAL";
           };
           if (data && data.isRealHardware) {
             setState((prev) => {
-              const c1 = Number(data.c1Weight ?? prev.c1Weight);
-              const c2 = Number(data.c2Weight ?? prev.c2Weight);
+              const c1 = Math.round(Number(data.c1Weight ?? prev.c1Weight));
+              const c2 = Math.round(Number(data.c2Weight ?? prev.c2Weight));
               const c1Valve = data.c1Valve === "OPEN" ? "OPEN" : "CLOSED";
               const c2Valve = data.c2Valve === "OPEN" ? "OPEN" : "CLOSED";
               const active = data.active === "C1" ? "C1" : data.active === "C2" ? "C2" : "NONE";
+              const targetMode = data.commandMode ?? data.mode ?? prev.mode;
               const t = thresholdGrams(prev.config);
               const bothLow = c1 <= t && c2 <= t;
 
@@ -79,12 +82,13 @@ export function useOxygenSystem() {
               }
 
               setHistory((h) =>
-                [...h, { t: Date.now(), c1: +c1.toFixed(1), c2: +c2.toFixed(1) }].slice(-MAX_POINTS),
+                [...h, { t: Date.now(), c1, c2 }].slice(-MAX_POINTS),
               );
 
               return {
                 ...prev,
                 connected: true,
+                mode: targetMode,
                 c1Weight: c1,
                 c2Weight: c2,
                 c1Valve,
