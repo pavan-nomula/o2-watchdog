@@ -50,13 +50,73 @@ let latestTelemetry: {
   c1Valve: "OPEN" | "CLOSED";
   c2Valve: "OPEN" | "CLOSED";
   active: "C1" | "C2" | "NONE";
+  mode?: "AUTO" | "MANUAL";
   lastUpdate: number;
   isRealHardware?: boolean;
 } | null = null;
 
+let controlCommands: {
+  mode: "AUTO" | "MANUAL";
+  c1Valve: "OPEN" | "CLOSED";
+  c2Valve: "OPEN" | "CLOSED";
+  hasCommand: boolean;
+} = {
+  mode: "AUTO",
+  c1Valve: "OPEN",
+  c2Valve: "CLOSED",
+  hasCommand: false,
+};
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/control") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        });
+      }
+
+      if (request.method === "POST") {
+        try {
+          const body = (await request.json()) as Record<string, unknown>;
+          if (body.mode === "AUTO" || body.mode === "MANUAL") {
+            controlCommands.mode = body.mode;
+          }
+          if (body.c1Valve === "OPEN" || body.c1Valve === "CLOSED") {
+            controlCommands.c1Valve = body.c1Valve;
+          }
+          if (body.c2Valve === "OPEN" || body.c2Valve === "CLOSED") {
+            controlCommands.c2Valve = body.c2Valve;
+          }
+          controlCommands.hasCommand = true;
+
+          return new Response(JSON.stringify({ success: true, command: controlCommands }), {
+            headers: {
+              "content-type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          });
+        } catch {
+          return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+            status: 400,
+            headers: { "content-type": "application/json", "Access-Control-Allow-Origin": "*" },
+          });
+        }
+      }
+
+      return new Response(JSON.stringify(controlCommands), {
+        headers: {
+          "content-type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
 
     if (url.pathname === "/api/telemetry") {
       if (request.method === "OPTIONS") {
@@ -83,15 +143,27 @@ export default {
                 : body.active === "C2" || body.active === 2 || body.active === "2"
                 ? "C2"
                 : "NONE",
+            mode: body.mode === "MANUAL" ? "MANUAL" : "AUTO",
             lastUpdate: Date.now(),
             isRealHardware: true,
           };
-          return new Response(JSON.stringify({ success: true, data: latestTelemetry }), {
-            headers: {
-              "content-type": "application/json",
-              "Access-Control-Allow-Origin": "*",
+
+          // Respond back with current controlCommands so ESP32 knows target mode & valves immediately
+          return new Response(
+            JSON.stringify({
+              success: true,
+              mode: controlCommands.mode,
+              c1Valve: controlCommands.c1Valve,
+              c2Valve: controlCommands.c2Valve,
+              hasCommand: controlCommands.hasCommand,
+            }),
+            {
+              headers: {
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+              },
             },
-          });
+          );
         } catch {
           return new Response(JSON.stringify({ error: "Invalid JSON" }), {
             status: 400,
@@ -100,12 +172,20 @@ export default {
         }
       }
 
-      return new Response(JSON.stringify(latestTelemetry ?? { isRealHardware: false }), {
-        headers: {
-          "content-type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+      return new Response(
+        JSON.stringify({
+          ...(latestTelemetry ?? { isRealHardware: false }),
+          commandMode: controlCommands.mode,
+          commandC1Valve: controlCommands.c1Valve,
+          commandC2Valve: controlCommands.c2Valve,
+        }),
+        {
+          headers: {
+            "content-type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
         },
-      });
+      );
     }
 
     try {

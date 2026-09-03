@@ -147,6 +147,16 @@ export function useOxygenSystem() {
     (cyl: "C1" | "C2", value: ValveState) => {
       setState((prev) => {
         if (prev.mode !== "MANUAL") return prev;
+        const nextC1 = cyl === "C1" ? value : prev.c1Valve;
+        const nextC2 = cyl === "C2" ? value : prev.c2Valve;
+
+        // Post command to backend API so ESP32 executes it
+        fetch("/api/control", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "MANUAL", c1Valve: nextC1, c2Valve: nextC2 }),
+        }).catch(() => {});
+
         return cyl === "C1"
           ? { ...prev, c1Valve: value, active: value === "OPEN" ? "C1" : prev.active }
           : { ...prev, c2Valve: value, active: value === "OPEN" ? "C2" : prev.active };
@@ -158,7 +168,18 @@ export function useOxygenSystem() {
 
   const setMode = useCallback(
     (mode: SystemState["mode"]) => {
-      setState((prev) => (prev.mode === mode ? prev : { ...prev, mode }));
+      setState((prev) => {
+        if (prev.mode === mode) return prev;
+
+        // Post mode change to backend API so ESP32 switches mode immediately
+        fetch("/api/control", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode, c1Valve: prev.c1Valve, c2Valve: prev.c2Valve }),
+        }).catch(() => {});
+
+        return { ...prev, mode };
+      });
       log("CONTROL", `Operating mode set to ${mode}`);
     },
     [log],
